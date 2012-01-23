@@ -1,0 +1,4 @@
+Tool for generating a GraphViz [1] representation of an ANTLR [2] parse tree.
+
+[1] http://www.graphviz.org
+[2] http://www.antlr.org
