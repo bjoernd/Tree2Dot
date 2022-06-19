@@ -3,21 +3,23 @@
 # This script parses a string representation of an ANTLR tree and
 # translates it into GraphViz' Dot language so that you can visualize
 # this as a DAG with the dot tool.
+import sys
 
-from antlr3 import *
-from TreeParser import TreeParser
-from TreeLexer import TreeLexer
+from antlr4 import *
+
 
 def evaluateTree(string):
-   if not string[-1] == '\n': string += "\n"
-   lex = TreeLexer(StringStream(string))
-   tokens = CommonTokenStream(lex)
-   parser = TreeParser(tokens)
-   parser.tree_def()
-   return parser.node_list, parser.connections
+    if not string[-1] == '\n': string += "\n"
+    lex = TreeLexer(InputStream(string))
+    tokens = CommonTokenStream(lex)
+    parser = TreeParser(tokens)
+    parser.tree_def()
+    return parser.node_list, parser.connections
+
 
 def usage():
-    print "Usage: Tree2Dot  <string>"
+    print("Usage: Tree2Dot  <string>")
+
 
 def main():
     if len(sys.argv) != 2:
@@ -25,32 +27,33 @@ def main():
         sys.exit(1)
 
     string = sys.argv[1]
-
     # Graph header
-#    print "/* Original string: '%s' */" % string
-    print "digraph g {"
-    print "\tnode [color=lightblue2, style=filled];"
+    #    print "/* Original string: '%s' */" % string
+    dot_str = "digraph g {"
+    dot_str += "\nnode [color=lightblue2, style=filled];"
 
-#    string = string.replace("/", "\/")
+    #    string = string.replace("/", "\/")
     # Now we go parsing. Evaluate() returns us a list of nodes and
     # a list of connections.
     nodes, connections = evaluateTree(string)
 
     # print nodes
-    for (node, label) in nodes :
-        print "\t", node, "[", "label =", label, "];"
+    for (node, label) in nodes:
+        dot_str += "\n{} [ label = {} ];".format(node, label)  # , node, "[", "label =", label, "];"
     # print connections
     for (n1, n2) in connections:
-        print "\t", n1, "->", n2, ";"
+        dot_str += "\n{} -> {} ;".format(n1, n2)  # + n1, "->", n2, ";")
 
     # Graph footer
-    print "}"
-    print
-    print "/**********************************************/"
-    print "/*    This graph was created by Tree2Graph    */"
-    print "/*    (c) Bjoern Doebel <doebel@tudos.org>    */"
-    print "/*    TU Dresden Operating Systems Group      */"
-    print "/*    2007                                    */"
-    print "/**********************************************/"
+    dot_str += "\n}"
+    dot_str += "/**********************************************/"
+    dot_str += "/*    This graph was created by Tree2Graph    */"
+    dot_str += "/*    (c) Bjoern Doebel <doebel@tudos.org>    */"
+    dot_str += "/*    TU Dresden Operating Systems Group      */"
+    dot_str += "/*    2007                                    */"
+    dot_str += "/**********************************************/"
+    return dot_str
 
-main()
+
+if __name__ == '__main__':
+    main()
